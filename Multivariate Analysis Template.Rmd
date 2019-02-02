@@ -1,0 +1,134 @@
+---
+title: "Multivariate Statistics"
+author: "Ellen Chancey"
+date: "February 2, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list=ls())
+data("mtcars")
+mydata <- mtcars[,c(1,3,4,5,6,7)]
+```
+
+This document contains helpful information on how to execute multivariate analysis in R. It was developed throughout the course of the KUMC Stat 850 Multivariate Statistcs course in the Spring 2019 term, taught by Dr. John Keighley.  
+
+
+# A. Descriptive Statistics  
+
+## 1. Basic Descriptive Stats 
+A single measure
+```{r}
+mean(mydata[,3]) # return the mean of column 3
+mean(mydata[3,]) # returns the mean of row 3, not always relevant hence the NA
+```
+
+Single measure on multiple rows or columns
+```{r}
+apply(mydata,1,median)[c(1,2,4)] # finds median of obs 1, 2, and 4
+apply(mydata,2,median)[c(1,2,4)] # finds median of cols 1, 2, and 4
+```
+
+Summary measures
+```{r}
+summary(mydata) # returns those descriptives on all columns
+summary(mydata[,3]) # returns min, 1st quart, median, mean, 3rd quart, and max of col 3
+```
+
+## 2. Correlation Matrix  
+```{r}
+corrmatrix <- cor(mydata)
+corrmatrix
+```
+
+## 3. Correlation Matrix with Significance Levels  
+Use the rcorr() function from the Hmisc package  
+Note that the output is a list of three items - r the correlation matrix, n the matrix of obs, and p the matrix of p values that indicate significance of correlations
+```{r}
+#install.packages("Hmisc") # if not already installed
+library("Hmisc")
+res2 <- rcorr(as.matrix(mydata))
+res2
+```
+
+Because R is object oriented, you can call just one of the list items
+```{r}
+res2$r
+res2$P
+res2$n
+```
+
+## 4. Creating a better correlation output view 
+```{r}
+# create function
+flattenCorrMatrix <- function(cormat, pmat) {
+  ut <- upper.tri(cormat)
+  data.frame(
+    row = rownames(cormat)[row(cormat)[ut]],
+    column = rownames(cormat)[col(cormat)[ut]],
+    cor  =(cormat)[ut],
+    p = pmat[ut]
+    )
+}
+
+# put the correlation matrix in cormat, the p values in pmat
+#flattenCorrMatrix(cormat, pmat)
+flattenCorrMatrix(res2$r, res2$P)
+
+```
+
+
+## 5. Visualizing Correlation  
+
+### a. Using corrplot
+```{r}
+#install.packages("corrplot")
+library(corrplot)
+corrplot(corrmatrix,type="upper",order = "hclust", tl.col = "black", tl.srt = 45)
+# tl.col is text label color, tl.srt text label string rotation
+```
+
+How to read this graph  
+- Positive correlations are in blue, negative correlations are in red  
+- Color intensity and size are proportional to corr coefficients  
+- The legend is the correlation coeff and coresponding colors  
+- Hclust reorders the matrix according to the corr coeff
+
+
+### b. Using chart.correlation
+```{r}
+#install.packages("PerformanceAnalytics")
+library("PerformanceAnalytics")
+chart.Correlation(mydata, histogram = TRUE, pch = 19)
+```
+
+How to read this graph  
+- Distributionof each variable is shown on diagonal
+- Below the histo is a bivariate scatter plot with a fitted line
+- Above the histo are values of correlation and significance stars p-values of (0, 0.0001, 0.01, 0.05, 0.1, 1) are symbols("***", "**", "*", ".", "")
+
+
+### c. Using heat map
+```{r}
+col <- colorRampPalette(c(4, 8, 2))(20)  # blue, grey, red
+heatmap(x = corrmatrix, col = col, symm = TRUE)
+```
+
+
+
+
+
+
+
+
+# References
+http://www.sthda.com/english/wiki/correlation-matrix-a-quick-start-guide-to-analyze-format-and-visualize-a-correlation-matrix-using-r-software  
+
+https://data-flair.training/blogs/descriptive-statistics-in-r/  
+
+#  Session Info
+```{r}
+sessionInfo()
+```
+
