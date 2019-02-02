@@ -36,13 +36,44 @@ summary(mydata) # returns those descriptives on all columns
 summary(mydata[,3]) # returns min, 1st quart, median, mean, 3rd quart, and max of col 3
 ```
 
-## 2. Correlation Matrix  
+## 2. Visualizing Data
+
+Using scatterplots
+```{r}
+pairs(mydata)
+```
+
+
+Using ggplot2
+```{r}
+#install.packages("ggplot2")
+library(ggplot2)
+
+plot(mtcars$mpg, #x axis
+     mtcars$wt, # y axis
+    col = mtcars$cyl, # color of dot
+    pch = 16, # shape
+    main = "Scatterplot of Miles per Gallon and Weight",
+    xlab = "Miles per Gallon",
+    ylab = "Weight"
+    )
+legend("topright",
+           title = "Cylinders",
+           legend = levels(as.factor(mtcars$cyl)),
+           col = c(4, 6,8), # assign which color should go to which level
+           pch = 15, # shape
+           bty = "n"
+           )
+```
+
+
+## 3. Correlation Matrix  
 ```{r}
 corrmatrix <- cor(mydata)
 corrmatrix
 ```
 
-## 3. Correlation Matrix with Significance Levels  
+## 4. Correlation Matrix with Significance Levels  
 Use the rcorr() function from the Hmisc package  
 Note that the output is a list of three items - r the correlation matrix, n the matrix of obs, and p the matrix of p values that indicate significance of correlations
 ```{r}
@@ -59,7 +90,8 @@ res2$P
 res2$n
 ```
 
-## 4. Creating a better correlation output view 
+
+## 5. Creating a better correlation output view 
 ```{r}
 # create function
 flattenCorrMatrix <- function(cormat, pmat) {
@@ -79,7 +111,7 @@ flattenCorrMatrix(res2$r, res2$P)
 ```
 
 
-## 5. Visualizing Correlation  
+## 6. Visualizing Correlation  
 
 ### a. Using corrplot
 ```{r}
@@ -116,6 +148,10 @@ heatmap(x = corrmatrix, col = col, symm = TRUE)
 ```
 
 
+### d. Using scatterplots
+```{r}
+pairs(corrmatrix)
+```
 
 
 
